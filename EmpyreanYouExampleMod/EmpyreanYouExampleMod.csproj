@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>EmpyreanYouExampleMod</AssemblyName>
+        <Product>EMPYREAN//YOU Example Mod</Product>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json;
+            https://nuget.samboy.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <RootNamespace>EmpyreanYouExampleMod</RootNamespace>
+    </PropertyGroup>
+
+    <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')"/>
+
+    <PropertyGroup>
+        <ManagedPath>$(EmpyreanYouPath)/EMPYREANYOU_Data/Managed</ManagedPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.Core" Version="5.*"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- game code -->
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(ManagedPath)/Assembly-CSharp.dll</HintPath>
+            <Private>false</Private>
+            <Publicize>true</Publicize>
+        </Reference>
+        <!-- unity code or game deps, add as you need -->
+        <Reference Include="UnityEngine">
+            <HintPath>$(ManagedPath)/UnityEngine.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(ManagedPath)/UnityEngine.CoreModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>$(ManagedPath)/UnityEngine.AssetBundleModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+    
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <!-- Copy the plugin outputs to the dev folder -->
+        <Exec Command="xcopy /Y /I &quot;$(TargetDir)&quot; &quot;$(MSBuildProjectFullPath)/../../dev/$(AssemblyName)/plugins&quot;" />
+        <!-- Copy the game to Unity's Assets/Plugins folder -->
+        <Copy SourceFiles="$(EmpyreanYouPath)/EMPYREANYOU_Data/Managed/Assembly-CSharp.dll" DestinationFolder="$(MSBuildProjectFullPath)/../../Assets/Assets/Plugins" />
+        <!-- Copy BepInEx to Unity's Assets/Plugins folder -->
+        <Exec Command="xcopy /Y /I &quot;$(EmpyreanYouPath)/BepInEx/core&quot; &quot;$(MSBuildProjectFullPath)/../../Assets/Assets/Plugins&quot;" />
+        <!-- Copy the plugin outputs to Unity's Assets/Plugins folder -->
+        <Exec Command="xcopy /Y /I &quot;$(TargetDir)&quot; &quot;$(MSBuildProjectFullPath)/../../Assets/Assets/Plugins&quot;" />
+        <!-- Build all Unity asset bundles -->
+        <Exec Command="&quot;$(UnityEditorPath)&quot; -projectPath &quot;$(MSBuildProjectFullPath)/../../Assets&quot; -executeMethod BuildAssetBundles.Run -quit" />
+        <!-- Copy the asset bundle to the plugin -->
+        <Exec Command="xcopy /Y /I &quot;$(MSBuildProjectFullPath)/../../Assets/build/assetbundles&quot; &quot;$(MSBuildProjectFullPath)/../../dev/$(AssemblyName)/assetbundles&quot;" />
+        <!-- Copy the files in resources -->
+        <Exec Command="xcopy /Y /I &quot;$(MSBuildProjectFullPath)/../../Resources&quot; &quot;$(MSBuildProjectFullPath)/../../dev/$(AssemblyName)&quot;" />
+    </Target>
+</Project>
