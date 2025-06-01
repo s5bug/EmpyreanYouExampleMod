@@ -7,6 +7,8 @@ An example mod for the game EMPYREAN//YOU.
 1. Use this GitHub template to create your own new repository
 2. Rename all occurrences of `EmpyreanYouExampleMod` (including folders and files) to your mod's name
 3. Edit `YourModName/YourModName.csproj.user` as needed to point to your game installation and the Unity Editor v2022.3.53f1 executable
+4. **Build the `csproj`.** Opening the Unity editor in `Assets` before building the C# project can lead to some things not working properly
+5. In the EMPYREAN//YOU Mods menu, add the newly-generated `dev` folder as a development mod folder
 
 ## folders explanation
 
@@ -14,13 +16,9 @@ An example mod for the game EMPYREAN//YOU.
 - `Assets` contains a Unity project where asset bundles be automatically built for loading
 - `Resources` contains files that will be copied to the `dev` directory
 
-## usage
-
-Add the `dev` directory as a development path in the Mods menu
-
 ## important notes
 
-- The Unity editor can freeze when building the asset bundle: in this case, kill it from Task Manager, delete _all_ Unity-generated files (files you didn't make) except for `.meta` files corresponding to the files you want in any asset bundles, and retry the build
+- The Unity editor can freeze when building the asset bundle: in this case, your `.meta` files are broken, and you will want to delete as many Unity-generated files as you can while keeping the `.meta`s for DLLs containing scripts you reference and assets going into your asset bundles intact
 - Ignore the error about Harmony being a broken Unity plugin
 - A dummy scene and a URP pipeline are required for meshes to render (but should not be part of the asset bundle)
 - Do not name any of your asset bundles `assetbundles`
